@@ -47,19 +47,14 @@ def main():
    model = Model()
    viewer = Viewer()
    controller = Controller()
-   timer = Timer()
+   controller.setModel(model)
+   controller.setViewer(viewer)
 
-   viewer.setup()
+   controller.setup()
 
    while controller.checkRunRequest():
-      # get the elapsed time since last render start
-      dt = timer.mark()
-
-      # get user inputs
-      controller.update(dt)
-
-      # update the model
-      model.update(dt, controller.getOutputs())
+      # The controller updates the model and view states
+      controller.update()
 
       # respond to any window adjustments
       viewer.checkResize(controller.checkFullScreenRequest())

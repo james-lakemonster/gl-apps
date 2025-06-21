@@ -11,6 +11,9 @@ class Model:
    def getStates(self):
       return self.states
 
+   def setup(self):
+      pass
+
    def update(self, dt, controls):
       states = self.states
 

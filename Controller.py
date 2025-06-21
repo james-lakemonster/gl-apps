@@ -1,17 +1,36 @@
 import pygame
+from Timer import Timer
+from Model import *
+from Viewer import *
 
 class Controller:
 
     def __init__(self):
         self.run = True
         self.fullscreen = False
+        self.timer = Timer()
 
-        self.outputs = {
+        self.modelControls = {
             "force": 0.0,
             "torque": 0.0
             }
+        self.model = None
 
-    def update(self, dt):
+    def setModel(self, model):
+        self.model = model
+
+    def setViewer(self, viewer):
+        self.viewer = viewer
+
+    def setup(self):
+        if self.viewer != None:
+            self.viewer.setup();
+        if self.model != None:
+            self.model.setup();
+        self.timer.reset();
+
+    def update(self):
+        dt = self.timer.mark()
 
         #
         # handle all discrete events
@@ -36,22 +55,23 @@ class Controller:
         #
         # handle continuous press hold key actions
         #
-        self.outputs["force"] = 0.0
-        self.outputs["torque"] = 0.0
+        self.modelControls["force"] = 0.0
+        self.modelControls["torque"] = 0.0
 
         pressedKeys = pygame.key.get_pressed()
         if pressedKeys[pygame.K_UP]:
-            self.outputs["force"] += 1.0
+            self.modelControls["force"] += 1.0
         if pressedKeys[pygame.K_DOWN]:
-            self.outputs["force"] -= 1.0
+            self.modelControls["force"] -= 1.0
         if pressedKeys[pygame.K_RIGHT]:
-            self.outputs["torque"] += 1.0
+            self.modelControls["torque"] += 1.0
         if pressedKeys[pygame.K_LEFT]:
-            self.outputs["torque"] -= 1.0
+            self.modelControls["torque"] -= 1.0
 
+        # update the model
+        if self.model != None:
+            self.model.update(dt, self.modelControls)
 
-    def getOutputs(self):
-        return self.outputs
 
     def checkRunRequest(self):
         return self.run
