@@ -18,11 +18,14 @@ class Viewer:
       self.fullscreen = False
       sglInit()
 
-   def checkResize(self, fullScreenRequested):
-      # handle fullscreen toggle requests
-      if fullScreenRequested != self.fullscreen:
-         pygame.display.toggle_fullscreen()
-         self.fullscreen = fullScreenRequested
+   def toggleFullScreen(self):
+      pygame.display.toggle_fullscreen()
+
+   def preDrawUpdate(self):
+      # Check for:
+      #     window resize
+      #     perspective change
+      #     clipping depth changes
 
       # if the window has changed size then:
       # compute the new perspective and
