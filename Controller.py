@@ -78,7 +78,7 @@ class Controller:
 
     # update the view for default drawing mode
     if self.viewer != None:
-        self.viewer.preDrawUpdate()
+      self.viewer.preDrawUpdate()
 
   def checkRunRequest(self):
     return self.run
