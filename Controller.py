@@ -11,9 +11,11 @@ class Controller:
             "torque": 0.0
             }
 
-    def update(self):
+    def update(self, dt):
 
+        #
         # handle all discrete events
+        #
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.run = False
@@ -31,10 +33,12 @@ class Controller:
                 elif event.key == pygame.K_ESCAPE:
                     self.run = False
 
+        #
+        # handle continuous press hold key actions
+        #
         self.outputs["force"] = 0.0
         self.outputs["torque"] = 0.0
 
-        # handle pressed (and held) keys
         pressedKeys = pygame.key.get_pressed()
         if pressedKeys[pygame.K_UP]:
             self.outputs["force"] += 1.0

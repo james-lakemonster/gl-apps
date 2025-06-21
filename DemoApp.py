@@ -3,10 +3,9 @@ import pygame
 from pygame.locals import *
 
 from SimpleGL import *
+from Viewer import *
 from Controller import *
-
-
-
+from Timer import *
 
 def initStates():
    states = {}
@@ -14,13 +13,13 @@ def initStates():
    states['distance'] = 5.0
    states['direction'] = 1.0
 
-   states['angleSpeed'] = 1.0
-   states['objectSpeed'] = 0.1
+   states['angleSpeed'] = 90.0
+   states['objectSpeed'] = 0.0
    return states
 
-def updateStates(states, controls):
+def updateStates(states, dt, controls):
    # increment the angle
-   states['angle'] += states['angleSpeed']
+   states['angle'] += states['angleSpeed'] * dt
 
    #wrap the angle
    if states['angle'] > 360:
@@ -29,7 +28,7 @@ def updateStates(states, controls):
       states['angle'] += 360
 
    # update distance
-   states['distance'] += states['objectSpeed']*states['direction'];
+   states['distance'] += states['objectSpeed'] * states['direction'] * dt;
 
    # bounce off the near and far walls
    if states['distance'] > 25:
@@ -37,12 +36,17 @@ def updateStates(states, controls):
    if states['distance'] < 5.0:
       states['direction'] = 1.0
 
+   #
    #user applied force and torque
-   states["objectSpeed"] += controls["force"] * 0.005
+   #
+
+   # m/s^2 acceleration
+   states["objectSpeed"] += controls["force"] * 10.0 * dt
    if states["objectSpeed"] < 0.0:
       states["objectSpeed"] = 0.0
 
-   states["angleSpeed"] += controls["torque"] * 0.1
+   # deg/s^2 angular acceleration
+   states["angleSpeed"] += controls["torque"] * 360.0 * dt
    if states["angleSpeed"] < 0.0:
       states["angleSpeed"] = 0.0
             
@@ -81,58 +85,23 @@ def drawScene(states):
    glPopMatrix()
 
 
-class Viewer:
-
-   def __init__(self):
-      self.windowSize = None
-      self.fullscreen = False
-      self.minClipDist = 0.1
-      self.maxClipDist = 50.0
-
-   def setup(self):
-      pygame.init()
-      pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
-      pygame.display.set_caption("SimpleGL Demo App")
-      self.fullscreen = False
-      sglInit()
-
-   def checkResize(self, fullScreenRequested):
-      # handle fullscreen toggle requests
-      if fullScreenRequested != self.fullscreen:
-         pygame.display.toggle_fullscreen()
-         self.fullscreen = fullScreenRequested
-
-      # if the window has changed size then:
-      # compute the new perspective and
-      # restore some basic intializations
-      newWindowSize = pygame.display.get_window_size()
-      if newWindowSize != self.windowSize:
-         self.windowSize = newWindowSize
-         glMatrixMode(GL_PROJECTION)
-         glLoadIdentity()
-         gluPerspective(45, (newWindowSize[0]/newWindowSize[1]), self.minClipDist, self.maxClipDist)
-         sglReInit()
-
-   def publishView(self):
-      pygame.display.flip()
-
-
 def main():
    states = initStates()
    viewer = Viewer()
    controller = Controller()
+   timer = Timer()
 
    viewer.setup()
 
    while controller.checkRunRequest():
       # get the elapsed time since last render start
-      dt = 0.01
+      dt = timer.mark()
 
       # get user inputs
-      controller.update()
+      controller.update(dt)
 
       # update the model
-      updateStates(states, controller.getOutputs())
+      updateStates(states, dt, controller.getOutputs())
 
       # respond to any window adjustments
       viewer.checkResize(controller.checkFullScreenRequest())
