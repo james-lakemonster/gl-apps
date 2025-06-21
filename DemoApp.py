@@ -15,12 +15,14 @@ def initStates():
    states['direction'] = 1.0
 
    states['angleSpeed'] = 1.0
-   states['objectSpeed'] = 1.0
+   states['objectSpeed'] = 0.1
    return states
 
 def updateStates(states, controls):
    # increment the angle
    states['angle'] += states['angleSpeed']
+
+   #wrap the angle
    if states['angle'] > 360:
       states['angle'] -= 360
    if states['angle'] < 360:
@@ -35,23 +37,14 @@ def updateStates(states, controls):
    if states['distance'] < 5.0:
       states['direction'] = 1.0
 
-   #user input to control specified states (objectSpeed and angleSpeed)
-   # keys = controller.getKeyStates()
-   # if keys["RIGHT"]:
-   #       states["angleSpeed"] += 0.04
-   # 
-   # if keys["LEFT"]:
-   #    states["angleSpeed"] -= 0.04
-   #    if states["angleSpeed"] < 0.0:
-   #       states["angleSpeed"] = 0.0
-   # 
-   # if keys["UP"]:
-   #    states["objectSpeed"] += 0.01
-   # 
-   # if keys["DOWN"]:
-   #    states["objectSpeed"] -= 0.01
-   #    if states["objectSpeed"] < 0.0:
-   #       states["objectSpeed"] = 0.0
+   #user applied force and torque
+   states["objectSpeed"] += controls["force"] * 0.005
+   if states["objectSpeed"] < 0.0:
+      states["objectSpeed"] = 0.0
+
+   states["angleSpeed"] += controls["torque"] * 0.1
+   if states["angleSpeed"] < 0.0:
+      states["angleSpeed"] = 0.0
             
 
 def drawScene(states):
@@ -87,19 +80,42 @@ def drawScene(states):
    glPopMatrix()
 
 
+class Viewer:
+
+   def __init__(self):
+      self.run = True
+
+   def setup(self):
+      pygame.init()
+      pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
+      pygame.display.set_caption("SimpleGL Demo App")
+      windowSize = None
+      fullscreen = False
+
+
+
 
 def main():
    pygame.init()
-   screen = pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
+   pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
+   pygame.display.set_caption("SimpleGL Demo App")
    windowSize = None
+
    sglInit()
 
    states = initStates()
    controller = Controller()
+
    fullscreen = False
 
    while controller.checkRunRequest():
       controller.update()
+
+      #view.checkResize(controller.checkFullScreenRequest())
+
+      if controller.checkFullScreenRequest() != fullscreen:
+         pygame.display.toggle_fullscreen()
+         fullscreen = not fullscreen
 
       # if the window has changed then compute the new perspective
       # and restore some basic intializations
@@ -111,9 +127,6 @@ def main():
          gluPerspective(45, (windowSize[0]/windowSize[1]), 0.1, 50.0)
          sglReInit()
          
-      if controller.checkFullScreenRequest() != fullscreen:
-         print("fullscreen has toggled!")
-         fullscreen = controller.checkFullScreenRequest()
 
       updateStates(states, controller.getOutputs())
 
