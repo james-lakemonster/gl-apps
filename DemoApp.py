@@ -1,11 +1,9 @@
 import sys
 import pygame
-from pygame.locals import *
 
 from Model import Model
 from Viewer import Viewer
 from Controller import Controller
-from Timer import Timer
 from SimpleGL import *
 
 
@@ -70,8 +68,8 @@ def main():
       # pad runtime as desired
       pygame.time.wait(10)
 
+   # strong quit avoids quit confirmation on OSX
    pygame.quit()
    sys.exit()
 
 main()
-
