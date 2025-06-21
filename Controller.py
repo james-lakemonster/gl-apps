@@ -17,6 +17,7 @@ class Controller:
       "torque": 0.0
       }
     self.model = None
+    self.viewer = None
 
   def setModel(self, model):
     self.model = model
@@ -76,7 +77,8 @@ class Controller:
       self.model.update(deltaTime, self.modelControls)
 
     # update the view for default drawing mode
-    self.viewer.preDrawUpdate()
+    if self.viewer != None:
+      self.viewer.preDrawUpdate()
 
   def checkRunRequest(self):
     return self.run
