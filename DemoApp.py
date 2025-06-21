@@ -48,6 +48,7 @@ def updateStates(states, controls):
             
 
 def drawScene(states):
+   sglClear()
    glMatrixMode(GL_MODELVIEW)
    glLoadIdentity()
 
@@ -83,57 +84,66 @@ def drawScene(states):
 class Viewer:
 
    def __init__(self):
-      self.run = True
+      self.windowSize = None
+      self.fullscreen = False
+      self.minClipDist = 0.1
+      self.maxClipDist = 50.0
 
    def setup(self):
       pygame.init()
       pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
       pygame.display.set_caption("SimpleGL Demo App")
-      windowSize = None
-      fullscreen = False
+      self.fullscreen = False
+      sglInit()
 
+   def checkResize(self, fullScreenRequested):
+      # handle fullscreen toggle requests
+      if fullScreenRequested != self.fullscreen:
+         pygame.display.toggle_fullscreen()
+         self.fullscreen = fullScreenRequested
 
+      # if the window has changed size then:
+      # compute the new perspective and
+      # restore some basic intializations
+      newWindowSize = pygame.display.get_window_size()
+      if newWindowSize != self.windowSize:
+         self.windowSize = newWindowSize
+         glMatrixMode(GL_PROJECTION)
+         glLoadIdentity()
+         gluPerspective(45, (newWindowSize[0]/newWindowSize[1]), self.minClipDist, self.maxClipDist)
+         sglReInit()
+
+   def publishView(self):
+      pygame.display.flip()
 
 
 def main():
-   pygame.init()
-   pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
-   pygame.display.set_caption("SimpleGL Demo App")
-   windowSize = None
-
-   sglInit()
-
    states = initStates()
+   viewer = Viewer()
    controller = Controller()
 
-   fullscreen = False
+   viewer.setup()
 
    while controller.checkRunRequest():
+      # get the elapsed time since last render start
+      dt = 0.01
+
+      # get user inputs
       controller.update()
 
-      #view.checkResize(controller.checkFullScreenRequest())
-
-      if controller.checkFullScreenRequest() != fullscreen:
-         pygame.display.toggle_fullscreen()
-         fullscreen = not fullscreen
-
-      # if the window has changed then compute the new perspective
-      # and restore some basic intializations
-      newWindowSize = pygame.display.get_window_size()
-      if newWindowSize != windowSize:
-         windowSize = newWindowSize
-         glMatrixMode(GL_PROJECTION)
-         glLoadIdentity()
-         gluPerspective(45, (windowSize[0]/windowSize[1]), 0.1, 50.0)
-         sglReInit()
-         
-
+      # update the model
       updateStates(states, controller.getOutputs())
 
-      sglClear()
-      drawScene(states)
-      pygame.display.flip()
+      # respond to any window adjustments
+      viewer.checkResize(controller.checkFullScreenRequest())
 
+      # render the new scene
+      drawScene(states)
+
+      # publish
+      viewer.publishView()
+
+      # pad runtime as desired
       pygame.time.wait(10)
 
    pygame.quit()
