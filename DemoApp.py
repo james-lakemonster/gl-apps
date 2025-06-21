@@ -1,10 +1,9 @@
 import sys
 import pygame
-
 from pygame.locals import *
 
 from SimpleGL import *
-import Controller
+from Controller import *
 
 
 
@@ -16,10 +15,10 @@ def initStates():
    states['direction'] = 1.0
 
    states['angleSpeed'] = 1.0
-   states['objectSpeed'] = 0.1
+   states['objectSpeed'] = 1.0
    return states
 
-def updateStates(states, controller):
+def updateStates(states, controls):
    # increment the angle
    states['angle'] += states['angleSpeed']
    if states['angle'] > 360:
@@ -37,22 +36,22 @@ def updateStates(states, controller):
       states['direction'] = 1.0
 
    #user input to control specified states (objectSpeed and angleSpeed)
-   keys = controller.getKeyStates()
-   if keys["RIGHT"]:
-         states["angleSpeed"] += 0.04
-
-   if keys["LEFT"]:
-      states["angleSpeed"] -= 0.04
-      if states["angleSpeed"] < 0.0:
-         states["angleSpeed"] = 0.0
-
-   if keys["UP"]:
-      states["objectSpeed"] += 0.01
-
-   if keys["DOWN"]:
-      states["objectSpeed"] -= 0.01
-      if states["objectSpeed"] < 0.0:
-         states["objectSpeed"] = 0.0
+   # keys = controller.getKeyStates()
+   # if keys["RIGHT"]:
+   #       states["angleSpeed"] += 0.04
+   # 
+   # if keys["LEFT"]:
+   #    states["angleSpeed"] -= 0.04
+   #    if states["angleSpeed"] < 0.0:
+   #       states["angleSpeed"] = 0.0
+   # 
+   # if keys["UP"]:
+   #    states["objectSpeed"] += 0.01
+   # 
+   # if keys["DOWN"]:
+   #    states["objectSpeed"] -= 0.01
+   #    if states["objectSpeed"] < 0.0:
+   #       states["objectSpeed"] = 0.0
             
 
 def drawScene(states):
@@ -96,11 +95,11 @@ def main():
    sglInit()
 
    states = initStates()
+   controller = Controller()
+   fullscreen = False
 
-   controller = Controller.Controller()
-
-   while controller.checkRunStatus():
-      controller.updateEvents()
+   while controller.checkRunRequest():
+      controller.update()
 
       # if the window has changed then compute the new perspective
       # and restore some basic intializations
@@ -111,8 +110,12 @@ def main():
          glLoadIdentity()
          gluPerspective(45, (windowSize[0]/windowSize[1]), 0.1, 50.0)
          sglReInit()
+         
+      if controller.checkFullScreenRequest() != fullscreen:
+         print("fullscreen has toggled!")
+         fullscreen = controller.checkFullScreenRequest()
 
-      updateStates(states, controller)
+      updateStates(states, controller.getOutputs())
 
       sglClear()
       drawScene(states)

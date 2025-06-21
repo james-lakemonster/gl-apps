@@ -3,7 +3,16 @@ import pygame
 class Controller:
 
     def __init__(self):
-        self.isRunning = True
+        self.run = True
+
+        self.fullscreen_pressed = False
+        self.fullscreen = False
+
+        self.outputs = {
+            "push": 0.0,
+            "twist": 0.0
+            }
+
         self.keysPressed = {
             "UP": False,
             "DOWN": False,
@@ -12,44 +21,50 @@ class Controller:
             }
 
 
-    def updateEvents(self):
+    def update(self):
+
+        self.outputs["push"] = 0.0
+        self.outputs["twist"] = 0.0
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.isRunning = False
+                self.run = False
 
             #toggle arrow keys
             elif event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
-                    self.isRunning = False
+                    self.run = False
+
+                elif event.key == pygame.K_f:
+                    # toggle full screen
+                    if self.fullscreen_pressed == False:
+                        self.fullscreen = not self.fullscreen
+                    self.fullscreen_pressed = True
 
                 elif event.key == pygame.K_UP:
-                    self.keysPressed["UP"] = True
+                    output["push"] += 1.0
 
                 elif event.key == pygame.K_DOWN:
-                    self.keysPressed["DOWN"] = True
+                    output["push"] -= 1.0
 
                 elif event.key == pygame.K_LEFT:
-                    self.keysPressed["LEFT"] = True
+                    self.outputs["twist"] -= 1.0
     
                 elif event.key == pygame.K_RIGHT:
-                    self.keysPressed["RIGHT"] = True
+                    self.outputs["twist"] += 1.0
 
+            # single action key press functions need to be checked for key release
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    self.keysPressed["UP"] = False
+                if event.key == pygame.K_f:
+                    # toggle full screen
+                    self.fullscreen_pressed = False
 
-                elif event.key == pygame.K_DOWN:
-                    self.keysPressed["DOWN"] = False
+    def getOutputs(self):
+        return self.outputs
 
-                elif event.key == pygame.K_LEFT:
-                    self.keysPressed["LEFT"] = False
+    def checkRunRequest(self):
+        return self.run
 
-                elif event.key == pygame.K_RIGHT:
-                    self.keysPressed["RIGHT"] = False
-
-    def getKeyStates(self):
-        return self.keysPressed
-
-    def checkRunStatus(self):
-        return self.isRunning
+    def checkFullScreenRequest(self):
+        return self.fullscreen
