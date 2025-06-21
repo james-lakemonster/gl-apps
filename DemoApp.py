@@ -1,6 +1,3 @@
-import sys
-import pygame
-
 from Model import Model
 from Viewer import Viewer
 from Controller import Controller
@@ -62,14 +59,10 @@ def main():
     # render the new scene
     drawScene(model.getStates())
 
-    # publish the new view
-    viewer.publishView()
+    # finalize the loop
+    controller.finalizeFrame()
 
-    # pad runtime as desired
-    pygame.time.wait(10)
-
-  # strong quit avoids quit confirmation in OS X
-  pygame.quit()
-  sys.exit()
+  # done - shutdown
+  controller.shutdown()
 
 main()

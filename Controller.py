@@ -80,5 +80,18 @@ class Controller:
     if self.viewer != None:
       self.viewer.preDrawUpdate()
 
+  def finalizeFrame(self):
+    # publish the new view
+    self.viewer.publishView()
+
+    # pad runtime as desired
+    pygame.time.wait(10)
+
   def checkRunRequest(self):
     return self.run
+  
+  def shutdown(self):
+    # proper shutdown
+    pygame.quit()
+    # strong exit avoids quit confirmation dialogue in OS X
+    sys.exit()
