@@ -96,20 +96,18 @@ def sglBox(length,height,width):
   glVertex3f(-l2,  h2, -w2)   # Point 4 (Left)
   glEnd()
 
-def sglCylinder(radius, height):
+def sglCylinder(radius, height, res = 32):
   global sglQuadric
   h2 = 0.5*height
-  res = 32
 
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
   gluCylinder(sglQuadric,radius,radius,height,res,res)
   glPopMatrix()
 
-def sglCappedCylinder(radius, height):
+def sglCappedCylinder(radius, height, res = 32):
   global sglQuadric
   h2 = 0.5*height
-  res = 32
 
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
@@ -121,10 +119,9 @@ def sglCappedCylinder(radius, height):
   gluDisk(sglQuadric,0.0,radius,res,3)
   glPopMatrix()
 
-def sglClosedCylinder(radius, height):
+def sglClosedCylinder(radius, height, res = 32):
   global sglQuadric
   h2 = 0.5*height
-  res = 32
 
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
@@ -138,8 +135,7 @@ def sglClosedCylinder(radius, height):
   gluDisk(sglQuadric,0.0,radius,res,3)
   glPopMatrix()
 
-def sglSphere(radius):
-  res = 32
+def sglSphere(radius, res = 32):
   glutSolidSphere(radius,res,res)
 
 #
