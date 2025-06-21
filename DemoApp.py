@@ -1,10 +1,9 @@
 import sys
 import pygame
-
 from pygame.locals import *
 
 from SimpleGL import *
-import Controller
+from Controller import *
 
 
 
@@ -19,9 +18,11 @@ def initStates():
    states['objectSpeed'] = 0.1
    return states
 
-def updateStates(states, controller):
+def updateStates(states, controls):
    # increment the angle
    states['angle'] += states['angleSpeed']
+
+   #wrap the angle
    if states['angle'] > 360:
       states['angle'] -= 360
    if states['angle'] < 360:
@@ -36,26 +37,18 @@ def updateStates(states, controller):
    if states['distance'] < 5.0:
       states['direction'] = 1.0
 
-   #user input to control specified states (objectSpeed and angleSpeed)
-   keys = controller.getKeyStates()
-   if keys["RIGHT"]:
-         states["angleSpeed"] += 0.04
+   #user applied force and torque
+   states["objectSpeed"] += controls["force"] * 0.005
+   if states["objectSpeed"] < 0.0:
+      states["objectSpeed"] = 0.0
 
-   if keys["LEFT"]:
-      states["angleSpeed"] -= 0.04
-      if states["angleSpeed"] < 0.0:
-         states["angleSpeed"] = 0.0
-
-   if keys["UP"]:
-      states["objectSpeed"] += 0.01
-
-   if keys["DOWN"]:
-      states["objectSpeed"] -= 0.01
-      if states["objectSpeed"] < 0.0:
-         states["objectSpeed"] = 0.0
+   states["angleSpeed"] += controls["torque"] * 0.1
+   if states["angleSpeed"] < 0.0:
+      states["angleSpeed"] = 0.0
             
 
 def drawScene(states):
+   sglClear()
    glMatrixMode(GL_MODELVIEW)
    glLoadIdentity()
 
@@ -88,36 +81,69 @@ def drawScene(states):
    glPopMatrix()
 
 
+class Viewer:
 
-def main():
-   pygame.init()
-   screen = pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
-   windowSize = None
-   sglInit()
+   def __init__(self):
+      self.windowSize = None
+      self.fullscreen = False
+      self.minClipDist = 0.1
+      self.maxClipDist = 50.0
 
-   states = initStates()
+   def setup(self):
+      pygame.init()
+      pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
+      pygame.display.set_caption("SimpleGL Demo App")
+      self.fullscreen = False
+      sglInit()
 
-   controller = Controller.Controller()
+   def checkResize(self, fullScreenRequested):
+      # handle fullscreen toggle requests
+      if fullScreenRequested != self.fullscreen:
+         pygame.display.toggle_fullscreen()
+         self.fullscreen = fullScreenRequested
 
-   while controller.checkRunStatus():
-      controller.updateEvents()
-
-      # if the window has changed then compute the new perspective
-      # and restore some basic intializations
+      # if the window has changed size then:
+      # compute the new perspective and
+      # restore some basic intializations
       newWindowSize = pygame.display.get_window_size()
-      if newWindowSize != windowSize:
-         windowSize = newWindowSize
+      if newWindowSize != self.windowSize:
+         self.windowSize = newWindowSize
          glMatrixMode(GL_PROJECTION)
          glLoadIdentity()
-         gluPerspective(45, (windowSize[0]/windowSize[1]), 0.1, 50.0)
+         gluPerspective(45, (newWindowSize[0]/newWindowSize[1]), self.minClipDist, self.maxClipDist)
          sglReInit()
 
-      updateStates(states, controller)
-
-      sglClear()
-      drawScene(states)
+   def publishView(self):
       pygame.display.flip()
 
+
+def main():
+   states = initStates()
+   viewer = Viewer()
+   controller = Controller()
+
+   viewer.setup()
+
+   while controller.checkRunRequest():
+      # get the elapsed time since last render start
+      dt = 0.01
+
+      # get user inputs
+      controller.update()
+
+      # update the model
+      updateStates(states, controller.getOutputs())
+
+      # respond to any window adjustments
+      viewer.checkResize(controller.checkFullScreenRequest())
+
+      # render the new scene
+      drawScene(states)
+
+      # publish
+      viewer.publishView()
+
+      # pad runtime as desired
       pygame.time.wait(10)
 
    pygame.quit()
