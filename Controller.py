@@ -4,74 +4,79 @@ from Model import *
 from Viewer import *
 
 class Controller:
+  # The Controller class handles
+  #   Frame updates / time stepping
+  #   pygame.events and keypresses
 
-    def __init__(self):
-        self.run = True
-        self.timer = Timer()
+  def __init__(self):
+    self.run = True
+    self.timer = Timer()
 
-        self.modelControls = {
-            "force": 0.0,
-            "torque": 0.0
-            }
-        self.model = None
+    self.modelControls = {
+      "force": 0.0,
+      "torque": 0.0
+      }
+    self.model = None
 
-    def setModel(self, model):
-        self.model = model
+  def setModel(self, model):
+    self.model = model
 
-    def setViewer(self, viewer):
-        self.viewer = viewer
+  def setViewer(self, viewer):
+    self.viewer = viewer
 
-    def setup(self):
-        if self.viewer != None:
-            self.viewer.setup();
-        if self.model != None:
-            self.model.setup();
-        self.timer.reset();
+  def setup(self):
+    if self.viewer != None:
+      self.viewer.setup();
+    if self.model != None:
+      self.model.setup();
 
-    def processEvents(self, dt):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.run = False
+    self.timer.reset();
 
-            elif event.type == pygame.KEYDOWN:
-                # alpha numeric keys
-                if event.key == pygame.K_f:
-                    self.viewer.toggleFullScreen()
-                elif event.key == pygame.K_q:
-                    self.run = False
+  def processEvents(self, dt):
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        self.run = False
 
-                # special keys
-                elif event.key == pygame.K_ESCAPE:
-                    self.run = False
+      elif event.type == pygame.KEYDOWN:
+        # alpha numeric keys
+        if event.key == pygame.K_f:
+          self.viewer.toggleFullScreen()
+        elif event.key == pygame.K_q:
+          self.run = False
 
-    def processKeys(self, dt):
-        pressedKeys = pygame.key.get_pressed()
-        if pressedKeys[pygame.K_UP]:
-            self.modelControls["force"] += 1.0
-        if pressedKeys[pygame.K_DOWN]:
-            self.modelControls["force"] -= 1.0
-        if pressedKeys[pygame.K_RIGHT]:
-            self.modelControls["torque"] += 1.0
-        if pressedKeys[pygame.K_LEFT]:
-            self.modelControls["torque"] -= 1.0
+        # special keys
+        elif event.key == pygame.K_ESCAPE:
+          self.run = False
 
-    def update(self):
-        # get the delta time
-        deltaTime = self.timer.mark()
+  def processKeys(self, dt):
+    pressedKeys = pygame.key.get_pressed()
+    if pressedKeys[pygame.K_UP]:
+      self.modelControls["force"] += 1.0
+    if pressedKeys[pygame.K_DOWN]:
+      self.modelControls["force"] -= 1.0
+    if pressedKeys[pygame.K_RIGHT]:
+      self.modelControls["torque"] += 1.0
+    if pressedKeys[pygame.K_LEFT]:
+      self.modelControls["torque"] -= 1.0
 
-        # without any input there are no applied forces/torques
-        self.modelControls["force"] = 0.0
-        self.modelControls["torque"] = 0.0
+  def update(self):
+    # get the delta time
+    deltaTime = self.timer.mark()
 
-        self.processEvents(deltaTime)
-        self.processKeys(deltaTime)
+    # without any input there are no applied forces/torques
+    self.modelControls["force"] = 0.0
+    self.modelControls["torque"] = 0.0
 
-        # update the model
-        if self.model != None:
-            self.model.update(deltaTime, self.modelControls)
+    # process input and system events
+    self.processEvents(deltaTime)
+    self.processKeys(deltaTime)
 
-        # update the view for default drawing mode
-        self.viewer.preDrawUpdate()
+    # update the model
+    if self.model != None:
+      self.model.update(deltaTime, self.modelControls)
 
-    def checkRunRequest(self):
-        return self.run
+    # update the view for default drawing mode
+    self.viewer.preDrawUpdate()
+
+  def checkRunRequest(self):
+    return self.run
