@@ -2,54 +2,12 @@ import sys
 import pygame
 from pygame.locals import *
 
+from Model import Model
+from Viewer import Viewer
+from Controller import Controller
+from Timer import Timer
 from SimpleGL import *
-from Viewer import *
-from Controller import *
-from Timer import *
 
-def initStates():
-   states = {}
-   states['angle'] = 0.0
-   states['distance'] = 5.0
-   states['direction'] = 1.0
-
-   states['angleSpeed'] = 90.0
-   states['objectSpeed'] = 0.0
-   return states
-
-def updateStates(states, dt, controls):
-   # increment the angle
-   states['angle'] += states['angleSpeed'] * dt
-
-   #wrap the angle
-   if states['angle'] > 360:
-      states['angle'] -= 360
-   if states['angle'] < 360:
-      states['angle'] += 360
-
-   # update distance
-   states['distance'] += states['objectSpeed'] * states['direction'] * dt;
-
-   # bounce off the near and far walls
-   if states['distance'] > 25:
-      states['direction'] = -1.0
-   if states['distance'] < 5.0:
-      states['direction'] = 1.0
-
-   #
-   #user applied force and torque
-   #
-
-   # m/s^2 acceleration
-   states["objectSpeed"] += controls["force"] * 10.0 * dt
-   if states["objectSpeed"] < 0.0:
-      states["objectSpeed"] = 0.0
-
-   # deg/s^2 angular acceleration
-   states["angleSpeed"] += controls["torque"] * 360.0 * dt
-   if states["angleSpeed"] < 0.0:
-      states["angleSpeed"] = 0.0
-            
 
 def drawScene(states):
    sglClear()
@@ -59,7 +17,7 @@ def drawScene(states):
    sglBasicLight(1.0)
 
    glPushMatrix()
-   glTranslatef(0.0,0.0, -states['distance'])
+   glTranslatef(0.0,0.0, -states['z'])
    glRotatef(states['angle'], 1, 1, 0)
 
    sglYellowPlasticMaterial()
@@ -86,7 +44,7 @@ def drawScene(states):
 
 
 def main():
-   states = initStates()
+   model = Model()
    viewer = Viewer()
    controller = Controller()
    timer = Timer()
@@ -101,13 +59,13 @@ def main():
       controller.update(dt)
 
       # update the model
-      updateStates(states, dt, controller.getOutputs())
+      model.update(dt, controller.getOutputs())
 
       # respond to any window adjustments
       viewer.checkResize(controller.checkFullScreenRequest())
 
       # render the new scene
-      drawScene(states)
+      drawScene(model.getStates())
 
       # publish
       viewer.publishView()
