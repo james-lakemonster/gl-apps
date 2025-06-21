@@ -147,6 +147,24 @@ def sglBlackPlasticMaterial():
   glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.5, 0.5, 0.5, 1.0))
   glMaterialfv(GL_FRONT, GL_SHININESS, 32)
 
+def sglRedPlasticMaterial():
+  glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.8, 0.0, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.8, 0.0, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.8, 0.0, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
+
+def sglGreenPlasticMaterial():
+  glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.0, 0.8, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.0, 0.8, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.0, 0.8, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
+
+def sglBluePlasticMaterial():
+  glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.0, 0.0, 0.8, 1.0))
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.0, 0.0, 0.8, 1.0))
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.0, 0.0, 0.8, 1.0))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
+
 def sglYellowPlasticMaterial():
   glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.6, 0.4, 0.0, 1.0))
   glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.6, 0.4, 0.0, 1.0))
