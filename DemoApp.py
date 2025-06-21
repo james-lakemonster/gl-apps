@@ -10,35 +10,40 @@ from SimpleGL import *
 
 
 def drawScene(states):
+   # Basic pre-draw steps
    sglClear()
    glMatrixMode(GL_MODELVIEW)
    glLoadIdentity()
 
+   # Turn on a light
    sglBasicLight(1.0)
 
+   # Set the drawing matrial
+   sglYellowPlasticMaterial()
+
+   # draw a dynamic object
    glPushMatrix()
    glTranslatef(0.0,0.0, -states['z'])
    glRotatef(states['angle'], 1, 1, 0)
-
-   sglYellowPlasticMaterial()
    sglBox(1.0,1.0,1.0)
    sglClosedCylinder(0.2, 4)
    glPopMatrix()
 
+   # draw an open cylinder in the top left
    glPushMatrix()
    glTranslatef(-5.0,5.0, -20)
-   sglYellowPlasticMaterial()
    sglCylinder(2, 2)
    glPopMatrix()
 
+   # draw a capped cylinder in the bottom left
    glPushMatrix()
    glTranslatef(-5.0,-5.0, -20)
    sglCappedCylinder(1.45, 3.6)
    glPopMatrix()
 
+   # draw a sphere in the top right
    glPushMatrix()
    glTranslatef(5.0,5.0, -20)
-   sglYellowPlasticMaterial()
    sglSphere(1.75)
    glPopMatrix()
 
@@ -47,22 +52,14 @@ def main():
    model = Model()
    viewer = Viewer()
    controller = Controller()
-   timer = Timer()
+   controller.setModel(model)
+   controller.setViewer(viewer)
 
-   viewer.setup()
+   controller.setup()
 
    while controller.checkRunRequest():
-      # get the elapsed time since last render start
-      dt = timer.mark()
-
-      # get user inputs
-      controller.update(dt)
-
-      # update the model
-      model.update(dt, controller.getOutputs())
-
-      # respond to any window adjustments
-      viewer.checkResize(controller.checkFullScreenRequest())
+      # The controller updates the model and view states
+      controller.update()
 
       # render the new scene
       drawScene(model.getStates())
