@@ -1,7 +1,6 @@
 from Model import Model
 from Viewer import Viewer
 from Controller import Controller
-from UJoint import *
 from SimpleGL import *
 
 
@@ -17,27 +16,44 @@ def drawScene(states, controller):
   # Set the drawing matrial
   sglYellowPlasticMaterial()
 
-  #glTranslatef(0.0,-5.0,-20.0)
-  #glRotatef(-90, 1, 0, 0)
-
   # make the screen coordinates X - right, Y in, Z up
   glRotatef(-90, 1, 0, 0)
-  glTranslatef(0.0,10.0,0.0)
-  # add a little perspective
+  # push the origin away 10 units in Y
+  glTranslatef(0.0,3.0,0.0)
+
+  # add a tilt for little off angle viewing perspective
   glRotatef(15, 1, 0, 0)
   glRotatef(-15, 0, 0, 1)
 
   # draw a reference triad off to the left
   if controller.check('show_hidden'):
     glPushMatrix()
-    glTranslatef(-3.0,0.0,-2.0)
+    glTranslatef(-3.0,3.0,-2.0)
     sglTriad(2.0)
     glPopMatrix()
 
   sglYellowPlasticMaterial()
 
   glPushMatrix()
-  drawUJoint(1.0, 0.0, 0.0)
+  glRotatef(states['angle'], 1, 0, 0)
+
+  sglYellowPlasticMaterial()
+  glPushMatrix()
+  glTranslatef(-3.0,0.0,0.0)
+  glRotatef(90, 0, 1, 0)
+  sglClosedCylinder(0.2,5.3,8)
+  glPopMatrix()
+
+  sglYellowPlasticMaterial()
+  sglAddUJoint(1.0, states['ujoint_angle1'], states['ujoint_angle2'])
+
+  sglYellowPlasticMaterial()
+  glPushMatrix()
+  glTranslatef(3.0,0.0,0.0)
+  glRotatef(90, 0, 1, 0)
+  sglClosedCylinder(0.2,5.3,8)
+  glPopMatrix()
+
   glPopMatrix()
 
 def main():

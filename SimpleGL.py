@@ -225,3 +225,43 @@ def sglTriad(scale):
 
   glPopMatrix()
 
+def sglAddUJoint(scale, angle1, angle2):
+  drawUJointYoke(scale)
+
+  glRotatef(angle1, 0, 1, 0)
+  drawUJointSpider(scale)
+  glRotatef(angle2, 0, 0, 1)
+
+  glPushMatrix()
+  glRotatef(90, 1, 0, 0)
+  glRotatef(180, 0, 1, 0)
+  drawUJointYoke(scale)
+  glPopMatrix()
+
+def drawUJointYoke(scale):
+  size = 0.28*scale
+  glPushMatrix()
+  glTranslatef(-0.25*scale,0.0,0.0)
+  glTranslatef(-0.25*scale + 0.5*size,0.0,0.0)
+  glRotatef(90, 0, -1, 0)
+  sglClosedCylinder(size, size)
+  glPopMatrix()
+
+  glPushMatrix()
+  glTranslatef(-0.22*scale,0.0,0.0)
+  glPushMatrix()
+  glTranslatef(0.0,0.22*scale,0.0)
+  sglBox(0.56*scale,0.05*scale,0.2*scale)
+  glPopMatrix()
+  glPushMatrix()
+  glTranslatef(0.0,-0.22*scale,0.0)
+  sglBox(0.56*scale,0.05*scale,0.2*scale)
+  glPopMatrix()
+  glPopMatrix()
+
+def drawUJointSpider(scale):
+  glPushMatrix()
+  sglClosedCylinder(0.03*scale, 0.505*scale)
+  glRotatef(90, 1, 0, 0)
+  sglClosedCylinder(0.03*scale, 0.505*scale)
+  glPopMatrix()

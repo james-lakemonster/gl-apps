@@ -40,7 +40,6 @@ class Controller:
     return False
 
   def processEvents(self):
-
     # Loop through published pyGame Events
     for event in pygame.event.get():
       # special events
