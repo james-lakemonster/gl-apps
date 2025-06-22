@@ -126,7 +126,7 @@ def sglClosedCylinder(radius, height, res = 32):
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
   gluCylinder(sglQuadric,radius,radius,height,res,res)
-  glRotatef(180.0,1.0,0.0,0.0)
+  glRotatef(180.0,0.0,1.0,0.0)
   gluDisk(sglQuadric,0.0,radius,res,3)
   glPopMatrix()
 
