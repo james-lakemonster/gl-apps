@@ -1,10 +1,11 @@
 from Model import Model
 from Viewer import Viewer
 from Controller import Controller
+from UJoint import *
 from SimpleGL import *
 
 
-def drawScene(states):
+def drawScene(states, controller):
   # Basic pre-draw steps
   sglClear()
   glMatrixMode(GL_MODELVIEW)
@@ -16,34 +17,28 @@ def drawScene(states):
   # Set the drawing matrial
   sglYellowPlasticMaterial()
 
-  # draw a dynamic object
-  glPushMatrix()
-  glTranslatef(0.0,0.0, -states['z'])
-  glRotatef(states['angle'], 1, 1, 0)
-  sglBox(1.0,1.0,1.0)
-  sglClosedCylinder(0.2, 4)
-  glPopMatrix()
+  #glTranslatef(0.0,-5.0,-20.0)
+  #glRotatef(-90, 1, 0, 0)
 
-  # draw an open cylinder in the top left
-  glPushMatrix()
-  glTranslatef(-5.0,5.0, -20)
-  sglCylinder(2, 2)
-  glPopMatrix()
+  # make the screen coordinates X - right, Y in, Z up
+  glRotatef(-90, 1, 0, 0)
+  glTranslatef(0.0,10.0,0.0)
+  # add a little perspective
+  glRotatef(15, 1, 0, 0)
+  glRotatef(-15, 0, 0, 1)
 
-  # draw a capped cylinder in the bottom left
-  glPushMatrix()
-  glTranslatef(-5.0,-5.0, -20)
-  #sglCappedCylinder(1.45, 3.6)
-  glRotatef(180, 0, 1, 0)
-  sglClosedCylinder(1.45, 3.6, 5)
-  glPopMatrix()
+  # draw a reference triad off to the left
+  if controller.check('show_hidden'):
+    glPushMatrix()
+    glTranslatef(-3.0,0.0,-2.0)
+    sglTriad(2.0)
+    glPopMatrix()
 
-  # draw a sphere in the top right
-  glPushMatrix()
-  glTranslatef(5.0,5.0, -20)
-  sglSphere(1.75)
-  glPopMatrix()
+  sglYellowPlasticMaterial()
 
+  glPushMatrix()
+  drawUJoint(1.0, 0.0, 0.0)
+  glPopMatrix()
 
 def main():
   model = Model()
@@ -59,7 +54,7 @@ def main():
     controller.update()
 
     # render the new scene
-    drawScene(model.getStates())
+    drawScene(model.getStates(), controller)
 
     # finalize the loop
     controller.finalizeFrame()

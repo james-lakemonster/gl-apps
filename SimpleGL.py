@@ -49,7 +49,7 @@ def sglBasicLight(light_scale = 0.8):
 
 
 #
-# Shapes Library
+# Basic Shapes Library
 #
 
 def sglBox(length,height,width):
@@ -96,20 +96,18 @@ def sglBox(length,height,width):
   glVertex3f(-l2,  h2, -w2)   # Point 4 (Left)
   glEnd()
 
-def sglCylinder(radius, height):
+def sglCylinder(radius, height, res = 32):
   global sglQuadric
   h2 = 0.5*height
-  res = 32
 
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
   gluCylinder(sglQuadric,radius,radius,height,res,res)
   glPopMatrix()
 
-def sglCappedCylinder(radius, height):
+def sglCappedCylinder(radius, height, res = 32):
   global sglQuadric
   h2 = 0.5*height
-  res = 32
 
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
@@ -121,15 +119,14 @@ def sglCappedCylinder(radius, height):
   gluDisk(sglQuadric,0.0,radius,res,3)
   glPopMatrix()
 
-def sglClosedCylinder(radius, height):
+def sglClosedCylinder(radius, height, res = 32):
   global sglQuadric
   h2 = 0.5*height
-  res = 32
 
   glPushMatrix()
   glTranslatef(0.0,0.0, -h2)
   gluCylinder(sglQuadric,radius,radius,height,res,res)
-  glRotatef(180.0,1.0,0.0,0.0)
+  glRotatef(180.0,0.0,1.0,0.0)
   gluDisk(sglQuadric,0.0,radius,res,3)
   glPopMatrix()
 
@@ -138,8 +135,7 @@ def sglClosedCylinder(radius, height):
   gluDisk(sglQuadric,0.0,radius,res,3)
   glPopMatrix()
 
-def sglSphere(radius):
-  res = 32
+def sglSphere(radius, res = 32):
   glutSolidSphere(radius,res,res)
 
 #
@@ -150,6 +146,24 @@ def sglBlackPlasticMaterial():
   glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.15, 0.15, 0.15, 1.0))
   glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.5, 0.5, 0.5, 1.0))
   glMaterialfv(GL_FRONT, GL_SHININESS, 32)
+
+def sglRedPlasticMaterial():
+  glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.8, 0.0, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.8, 0.0, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.8, 0.0, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
+
+def sglGreenPlasticMaterial():
+  glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.0, 0.8, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.0, 0.8, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.0, 0.8, 0.0, 1.0))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
+
+def sglBluePlasticMaterial():
+  glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.0, 0.0, 0.8, 1.0))
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, GLfloat_4( 0.0, 0.0, 0.8, 1.0))
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.0, 0.0, 0.8, 1.0))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
 
 def sglYellowPlasticMaterial():
   glMaterialfv(GL_FRONT, GL_AMBIENT, GLfloat_4( 0.6, 0.4, 0.0, 1.0))
@@ -187,5 +201,27 @@ def sglTableMaterial():
   glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.3, 0.25, 0.2, 1.0))
   glMaterialfv(GL_FRONT, GL_SHININESS, 50)
 
+#
+# Custom Shapes
+#
 
+def sglTriad(scale):
+  halfScale = 0.5 * scale
+  lineScale = 0.033 * scale
+
+  glPushMatrix()
+
+  sglRedPlasticMaterial()
+  glTranslatef(halfScale,0.0,0.0)
+  sglBox(scale,lineScale,lineScale)
+
+  sglGreenPlasticMaterial()
+  glTranslatef(-halfScale,halfScale,0.0)
+  sglBox(lineScale,scale,lineScale)
+
+  sglBluePlasticMaterial()
+  glTranslatef(0.0,-halfScale,halfScale)
+  sglBox(lineScale,lineScale,scale)
+
+  glPopMatrix()
 
