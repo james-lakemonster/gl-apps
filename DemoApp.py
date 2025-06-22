@@ -33,7 +33,9 @@ def drawScene(states):
   # draw a capped cylinder in the bottom left
   glPushMatrix()
   glTranslatef(-5.0,-5.0, -20)
-  sglCappedCylinder(1.45, 3.6)
+  #sglCappedCylinder(1.45, 3.6)
+  glRotatef(180, 0, 1, 0)
+  sglClosedCylinder(1.45, 3.6, 5)
   glPopMatrix()
 
   # draw a sphere in the top right

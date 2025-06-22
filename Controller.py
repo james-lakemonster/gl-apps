@@ -18,72 +18,6 @@ class Controller:
 
     self.timer = Timer()
 
-  def loadControls(self):
-    self.controls = {
-      'run': True,
-      'show_hidden': False,
-      'force': 0.0,
-      'torque': 0.0
-      }
-
-  def loadKeyCallbacks(self):
-    self.keyCallbacks = {
-      pygame.K_f: {
-        'key_help_name': 'F',
-        'type': 'tap',
-        'description': 'Toggle fullscreen mode',
-        'callback': lambda: self.toggleFullScreen()
-        },
-      pygame.K_h: {
-        'key_help_name': 'H',
-        'type': 'tap',
-        'description': 'Help',
-        'callback': lambda: self.showHelp()
-        },
-      pygame.K_p: {
-        'key_help_name': 'P',
-        'type': 'tap',
-        'description': 'Show/Hide additional geometries',
-        'callback': lambda: self.toggleControl('show_hidden')
-        },
-      pygame.K_q: {
-        'key_help_name': 'Q',
-        'type': 'tap',
-        'description': 'Quit',
-        'callback': lambda: self.setControl('run', False)
-        },
-      pygame.K_ESCAPE: {
-        'key_help_name': 'ESC',
-        'type': 'tap',
-        'description': 'Quit',
-        'callback': lambda: self.setControl('run', False)
-        },
-      pygame.K_UP: {
-        'key_help_name': 'ARROW_UP/DOWN',
-        'type': 'held',
-        'description': 'Increase/Decrease linear motion speed',
-        'callback': lambda: self.setControl('force', self.controls['force'] + 1.0)
-        },
-      pygame.K_DOWN: {
-        'key_help_name': None, # this key is documented with the UP ARROW
-        'type': 'held',
-        'description': '',
-        'callback': lambda: self.setControl('force', self.controls['force'] - 1.0)
-        },
-      pygame.K_RIGHT: {
-        'key_help_name': 'ARROW_RIGHT/LEFT',
-        'type': 'held',
-        'description': 'Increase/Decrease angular rotation speed',
-        'callback': lambda: self.setControl('torque', self.controls['torque'] + 1.0)
-        },
-      pygame.K_LEFT: {
-        'key_help_name': None,
-        'type': 'held',
-        'description': '',  # this key is documented with the RIGHT ARROW
-        'callback': lambda: self.setControl('torque', self.controls['torque'] - 1.0)
-        },
-      }
-
   def setModel(self, model):
     self.model = model
 
@@ -157,8 +91,7 @@ class Controller:
   def shutdown(self):
     # proper shutdown
     pygame.quit()
-    # strong exit avoids quit confirmation dialogue in OS X
-    sys.exit()
+    sys.exit() # strong exit avoids quit confirmation dialogue in OS X
 
   def showHelp(self):
     print('\n\nThe following commands are availble:')
@@ -179,3 +112,72 @@ class Controller:
 
   def setControl(self, name: str, value):
     self.controls[name] = value
+
+  #
+  # Customizations
+  #
+  def loadControls(self):
+    self.controls = {
+      'run': True,
+      'show_hidden': False,
+      'force': 0.0,
+      'torque': 0.0
+      }
+
+  def loadKeyCallbacks(self):
+    self.keyCallbacks = {
+      pygame.K_f: {
+        'key_help_name': 'F',
+        'type': 'tap',
+        'description': 'Toggle fullscreen mode',
+        'callback': self.toggleFullScreen
+        },
+      pygame.K_h: {
+        'key_help_name': 'H',
+        'type': 'tap',
+        'description': 'Help',
+        'callback': self.showHelp
+        },
+      pygame.K_p: {
+        'key_help_name': 'P',
+        'type': 'tap',
+        'description': 'Show/Hide additional geometries',
+        'callback': lambda: self.toggleControl('show_hidden')
+        },
+      pygame.K_q: {
+        'key_help_name': 'Q',
+        'type': 'tap',
+        'description': 'Quit',
+        'callback': lambda: self.setControl('run', False)
+        },
+      pygame.K_ESCAPE: {
+        'key_help_name': 'ESC',
+        'type': 'tap',
+        'description': 'Quit',
+        'callback': lambda: self.setControl('run', False)
+        },
+      pygame.K_UP: {
+        'key_help_name': 'ARROW_UP/DOWN',
+        'type': 'held',
+        'description': 'Increase/Decrease linear motion speed',
+        'callback': lambda: self.setControl('force', self.controls['force'] + 1.0)
+        },
+      pygame.K_DOWN: {
+        'key_help_name': None, # this key is documented with the UP ARROW
+        'type': 'held',
+        'description': '',
+        'callback': lambda: self.setControl('force', self.controls['force'] - 1.0)
+        },
+      pygame.K_RIGHT: {
+        'key_help_name': 'ARROW_RIGHT/LEFT',
+        'type': 'held',
+        'description': 'Increase/Decrease angular rotation speed',
+        'callback': lambda: self.setControl('torque', self.controls['torque'] + 1.0)
+        },
+      pygame.K_LEFT: {
+        'key_help_name': None,
+        'type': 'held',
+        'description': '',  # this key is documented with the RIGHT ARROW
+        'callback': lambda: self.setControl('torque', self.controls['torque'] - 1.0)
+        },
+      }
