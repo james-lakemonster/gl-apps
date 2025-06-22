@@ -5,7 +5,7 @@ from UJoint import *
 from SimpleGL import *
 
 
-def drawScene(states):
+def drawScene(states, controller):
   # Basic pre-draw steps
   sglClear()
   glMatrixMode(GL_MODELVIEW)
@@ -28,28 +28,11 @@ def drawScene(states):
   glRotatef(-15, 0, 0, 1)
 
   # draw a reference triad off to the left
-  glPushMatrix()
-  glTranslatef(-3.0,0.0,-2.0)
-
-  glPushMatrix()
-  sglRedPlasticMaterial()
-  glTranslatef(1.5,0.0,0.0)
-  sglBox(3.0,0.1,0.1)
-  glPopMatrix()
-
-  glPushMatrix()
-  sglGreenPlasticMaterial()
-  glTranslatef(0.0,1.5,0.0)
-  sglBox(0.1,3.0,0.1)
-  glPopMatrix()
-  
-  glPushMatrix()
-  sglBluePlasticMaterial()
-  glTranslatef(0.0,0.0,1.5)
-  sglBox(0.1,0.1,3.0)
-  glPopMatrix()
-  
-  glPopMatrix()
+  if controller.check("show_triads"):
+    glPushMatrix()
+    glTranslatef(-3.0,0.0,-2.0)
+    sglTriad(2.0)
+    glPopMatrix()
 
   sglYellowPlasticMaterial()
 
@@ -66,12 +49,12 @@ def main():
 
   controller.setup()
 
-  while controller.checkRunRequest():
+  while controller.check('run'):
     # The controller updates the model and view states
     controller.update()
 
     # render the new scene
-    drawScene(model.getStates())
+    drawScene(model.getStates(), controller)
 
     # finalize the loop
     controller.finalizeFrame()

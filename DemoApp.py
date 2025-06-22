@@ -52,7 +52,7 @@ def main():
 
   controller.setup()
 
-  while controller.checkRunRequest():
+  while controller.check('run'):
     # The controller updates the model and view states
     controller.update()
 

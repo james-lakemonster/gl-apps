@@ -49,7 +49,7 @@ def sglBasicLight(light_scale = 0.8):
 
 
 #
-# Shapes Library
+# Basic Shapes Library
 #
 
 def sglBox(length,height,width):
@@ -201,5 +201,27 @@ def sglTableMaterial():
   glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_4( 0.3, 0.25, 0.2, 1.0))
   glMaterialfv(GL_FRONT, GL_SHININESS, 50)
 
+#
+# Custom Shapes
+#
 
+def sglTriad(scale):
+  halfScale = 0.5 * scale
+  lineScale = 0.033 * scale
+
+  glPushMatrix()
+
+  sglRedPlasticMaterial()
+  glTranslatef(halfScale,0.0,0.0)
+  sglBox(scale,lineScale,lineScale)
+
+  sglGreenPlasticMaterial()
+  glTranslatef(-halfScale,halfScale,0.0)
+  sglBox(lineScale,scale,lineScale)
+
+  sglBluePlasticMaterial()
+  glTranslatef(0.0,-halfScale,halfScale)
+  sglBox(lineScale,lineScale,scale)
+
+  glPopMatrix()
 
