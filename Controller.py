@@ -14,14 +14,14 @@ class Controller:
 
     self.controls = {
       'run': True,
-      'show_triads': False,
+      'show_hidden': False,
       'force': 0.0,
       'torque': 0.0
       }
 
     self.tappedKeyCallbacks = {
       pygame.K_f: lambda: self.viewer.toggleFullScreen(),
-      pygame.K_t: lambda: self.toggleControl('show_triads'),
+      pygame.K_h: lambda: self.toggleControl('show_hidden'),
       pygame.K_q: lambda: self.setControl('run', False),
       pygame.K_ESCAPE: lambda: self.setControl('run', False)
       }
@@ -65,7 +65,7 @@ class Controller:
       if event.type == pygame.QUIT:
         self.controls['run'] = False
 
-      # key strokes
+      # key stroke events
       elif event.type == pygame.KEYDOWN:
         if event.key in self.tappedKeyCallbacks.keys():
           self.tappedKeyCallbacks[event.key]()

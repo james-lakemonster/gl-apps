@@ -28,7 +28,7 @@ def drawScene(states, controller):
   glRotatef(-15, 0, 0, 1)
 
   # draw a reference triad off to the left
-  if controller.check("show_triads"):
+  if controller.check('show_hidden'):
     glPushMatrix()
     glTranslatef(-3.0,0.0,-2.0)
     sglTriad(2.0)
