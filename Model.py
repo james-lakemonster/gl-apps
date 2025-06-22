@@ -38,7 +38,7 @@ class Model:
     # wrap the angle
     if states['angle'] > 360:
       states['angle'] -= 360
-    if states['angle'] < 360:
+    if states['angle'] < -360:
       states['angle'] += 360
 
     # bounce off the near and far walls
