@@ -9,6 +9,9 @@ class Controller:
   #   pygame.events and keypresses
 
   def __init__(self):
+    self.model = None
+    self.viewer = None
+
     self.controls = {
       'run': True,
       'show_triads': False,
@@ -16,20 +19,21 @@ class Controller:
       'torque': 0.0
       }
 
+    self.tappedKeyCallbacks = {
+      pygame.K_f: lambda: self.viewer.toggleFullScreen(),
+      pygame.K_t: lambda: self.toggleControl('show_triads'),
+      pygame.K_q: lambda: self.setControl('run', False),
+      pygame.K_ESCAPE: lambda: self.setControl('run', False)
+      }
+
+    self.pressedKeyCallbacks = {
+      pygame.K_UP: lambda: self.setControl('force', self.controls['force'] + 1.0),
+      pygame.K_DOWN: lambda: self.setControl('force', self.controls['force'] - 1.0),
+      pygame.K_RIGHT: lambda: self.setControl('torque', self.controls['torque'] + 1.0),
+      pygame.K_LEFT: lambda: self.setControl('torque', self.controls['torque'] - 1.0)
+      }
+
     self.timer = Timer()
-
-    self.model = None
-    self.viewer = None
-
-  def check(self, name: str):
-    try:
-      value = self.controls[name]
-    except KeyError:
-      value = False
-
-    if not isinstance(value, bool):
-      value = False
-    return value
 
   def setModel(self, model):
     self.model = model
@@ -43,7 +47,17 @@ class Controller:
     if self.model != None:
       self.model.setup();
 
-    self.timer.reset();
+    self.timer.reset()
+
+  def check(self, name: str):
+    try:
+      value = self.controls[name]
+    except KeyError:
+      value = False
+
+    if not isinstance(value, bool):
+      value = False
+    return value
 
   def processEvents(self, dt):
     for event in pygame.event.get():
@@ -53,29 +67,17 @@ class Controller:
 
       # key strokes
       elif event.type == pygame.KEYDOWN:
-        # alpha numeric keys
-        if event.key == pygame.K_f:
-          self.viewer.toggleFullScreen()
-        elif event.key == pygame.K_t:
-          # toggle triad visibility
-          self.controls['show_triads'] = not self.controls['show_triads']
-        elif event.key == pygame.K_q:
-          self.controls['run'] = False
-
-        # special keys
-        elif event.key == pygame.K_ESCAPE:
-          self.controls['run'] = False
+        if event.key in self.tappedKeyCallbacks.keys():
+          self.tappedKeyCallbacks[event.key]()
 
   def processKeys(self, dt):
+    # Get the pressed state of all keys
     pressedKeys = pygame.key.get_pressed()
-    if pressedKeys[pygame.K_UP]:
-      self.controls["force"] += 1.0
-    if pressedKeys[pygame.K_DOWN]:
-      self.controls["force"] -= 1.0
-    if pressedKeys[pygame.K_RIGHT]:
-      self.controls["torque"] += 1.0
-    if pressedKeys[pygame.K_LEFT]:
-      self.controls["torque"] -= 1.0
+
+    # Check the list of available assigned callbacks against the pressed keys
+    for key_name in self.pressedKeyCallbacks:
+      if pressedKeys[key_name]:
+        self.pressedKeyCallbacks[key_name]()
 
   def update(self):
     # get the delta time
@@ -109,3 +111,12 @@ class Controller:
     pygame.quit()
     # strong exit avoids quit confirmation dialogue in OS X
     sys.exit()
+
+  #
+  # Useful Functions for defining callbacks
+  #
+  def toggleControl(self, name: str):
+    self.controls[name] = not self.controls[name]
+
+  def setControl(self, name: str, value):
+    self.controls[name] = value
