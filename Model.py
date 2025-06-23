@@ -5,7 +5,7 @@ class Model:
     self.time = 0.0
     self.states = {
       "angle": 0.0,
-      "angle_dot": 90.0,
+      "angle_dot": 0.0,
       "z": 5.0,
       "z_speed": 0.0,
       "z_motion_direction": 1.0,
@@ -30,8 +30,13 @@ class Model:
     states['angle_dot'] += controls['torque'] * 360.0 * dt
 
     # some specified motions for a U joint
-    states['ujoint_angle1'] = math.cos(2.0*self.time)*15.0
-    states['ujoint_angle2'] = -math.sin(2.0*self.time)*15.0
+    theta = states['angle']*math.pi/180.0
+    phi   = -math.pi/4
+    alpha = math.atan(math.cos(theta)*math.tan(phi))
+    beta  = math.asin(-math.sin(theta)*math.sin(phi))
+    
+    states['ujoint_angle1'] = alpha * 180.0 / math.pi
+    states['ujoint_angle2'] = beta * 180.0 / math.pi
 
     # apply constraints (incase any states are out of bounds)
 
