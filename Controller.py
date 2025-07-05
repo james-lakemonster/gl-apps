@@ -1,36 +1,26 @@
 import pygame
+import sys
 from Timer import Timer
-from Model import *
-from Viewer import *
+from Model import Model
+from Viewer import Viewer
 
 class Controller:
   # The Controller class handles
   #   Frame updates / time stepping
   #   pygame.events and keypresses
 
-  def __init__(self):
-    self.model = None
-    self.viewer = None
+  def __init__(self, model: Model, viewer: Viewer):
+    self.model = model
+    self.viewer = viewer
     self.deltaTime = 0.0
 
     self.loadControls()
     self.loadKeyCallbacks()
 
+    self.viewer.setup()
+    self.model.setup()
+
     self.timer = Timer()
-
-  def setModel(self, model):
-    self.model = model
-
-  def setViewer(self, viewer):
-    self.viewer = viewer
-
-  def setup(self):
-    if self.viewer != None:
-      self.viewer.setup();
-    if self.model != None:
-      self.model.setup();
-
-    self.timer.reset()
 
   def check(self, name: str):
     if name in self.controls.keys():
