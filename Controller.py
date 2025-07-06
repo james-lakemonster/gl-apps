@@ -22,6 +22,14 @@ class Controller:
 
     self.timer = Timer()
 
+  def run(self):
+    while self.controls['run']:
+      # Process the controls to update the model and the view
+      self.update()
+
+    # done - shutdown
+    self.shutdown()
+
   def check(self, name: str):
     if name in self.controls.keys():
       value = self.controls[name]
@@ -63,16 +71,10 @@ class Controller:
     self.processEvents()
 
     # update the model
-    if self.model is not None:
-      self.model.update(self.deltaTime, self.controls)
+    self.model.update(self.deltaTime, self.controls)
 
-    # update the view for default drawing mode
-    if self.viewer is not None:
-      self.viewer.preDrawUpdate()
-
-  def finalizeFrame(self):
-    # publish the new view
-    self.viewer.publishView()
+    # update the view
+    self.viewer.update(self.model, self)
 
     # pad runtime as desired
     pygame.time.wait(10)

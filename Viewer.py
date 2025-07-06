@@ -4,7 +4,10 @@ from SimpleGL import *
 
 class Viewer:
   # The Viewer class abstracts all pygame.display functions
-  def __init__(self):
+  def __init__(self, name : str = ""):
+    self.name = name
+    if self.name == "":
+      self.name = "A SimpleGL App"
     self.windowSize = None
     self.minClipDist = 0.1
     self.maxClipDist = 50.0
@@ -12,7 +15,7 @@ class Viewer:
   def setup(self):
     pygame.init()
     pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
-    pygame.display.set_caption("SimpleGL Demo App")
+    pygame.display.set_caption(self.name)
     sglInit()
 
   def toggleFullScreen(self):
@@ -35,5 +38,15 @@ class Viewer:
       gluPerspective(45, (newWindowSize[0]/newWindowSize[1]), self.minClipDist, self.maxClipDist)
       sglReInit()
 
-  def publishView(self):
+  def draw(self, modelStates, controlStates):
+    pass
+
+  def update(self, model, controller):
+    # update the view for default drawing mode
+    self.preDrawUpdate()
+
+    # render the new scene
+    self.draw(model, controller)
+
+    # publish the new view
     pygame.display.flip()

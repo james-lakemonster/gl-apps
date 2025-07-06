@@ -4,9 +4,10 @@ from Controller import Controller
 from SimpleGL import *
 import math
 
-class BasicModel(Model):
+class DemoModel(Model):
   def __init__(self):
     super().__init__()
+    self.time = 0.0
     self.states["angle"] = 0.0
     self.states["angle_dot"] = 0.0
     self.states["z"] = 5.0
@@ -14,7 +15,7 @@ class BasicModel(Model):
     self.states["z_motion_direction"] = 1.0
 
   def update(self, dt, controls):
-    self.time += dt
+    super().update(dt, controls)
     states = self.states
 
     # integrate the states
@@ -47,8 +48,12 @@ class BasicModel(Model):
       states["angle_dot"] = 0.0
 
 
-  def draw(self, controls = None):
-    states = self.states
+class DemoViewer(Viewer):
+  def __init__(self):
+    super().__init__("SimpleGL First Demo")
+
+  def draw(self, model, controls = None):
+    states = model.states
 
     # Basic pre-draw steps
     sglClear()
@@ -89,21 +94,7 @@ class BasicModel(Model):
 
 
 def main():
-  model = BasicModel()
-  viewer = Viewer()
-  controller = Controller(model, viewer)
+  Controller(DemoModel(), DemoViewer()).run()
 
-  while controller.check('run'):
-    # The controller updates the model and view states
-    controller.update()
-
-    # render the new scene
-    model.draw(controller)
-
-    # finalize the loop
-    controller.finalizeFrame()
-
-  # done - shutdown
-  controller.shutdown()
 
 main()

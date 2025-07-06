@@ -7,42 +7,46 @@ import math
 class UJointModel(Model):
   def __init__(self):
     super().__init__()
-    self.states["angle"] = 0.0
-    self.states["angle_dot"] = 0.0
-    self.states["ujoint_angle1"] = 0.0
-    self.states["ujoint_angle2"] = 0.0
+    self.states["input_angle"] = 0.0
+    self.states["input_angle_dot"] = 0.0
+    self.states["angle1"] = 0.0
+    self.states["angle2"] = 0.0
 
   def update(self, dt, controls):
-    self.time += dt
+    super().update(dt, controls)
     states = self.states
 
     # integrate the states
-    states['angle'] += states['angle_dot'] * dt
-    states['angle_dot'] += controls['torque'] * 360.0 * dt
+    states['input_angle'] += states['input_angle_dot'] * dt
+    states['input_angle_dot'] += controls['torque'] * 360.0 * dt
 
     # some specified motions for a U joint
-    theta = states['angle']*math.pi/180.0
+    theta = states['input_angle']*math.pi/180.0
     phi   = -math.pi/4
     alpha = math.atan(math.cos(theta)*math.tan(phi))
     beta  = math.asin(-math.sin(theta)*math.sin(phi))
 
-    states['ujoint_angle1'] = alpha * 180.0 / math.pi
-    states['ujoint_angle2'] = beta * 180.0 / math.pi
+    states['angle1'] = alpha * 180.0 / math.pi
+    states['angle2'] = beta * 180.0 / math.pi
 
     # apply constraints (incase any states are out of bounds)
 
     # wrap the angle
-    if states['angle'] > 360:
-      states['angle'] -= 360
-    if states['angle'] < -360:
-      states['angle'] += 360
+    if states['input_angle'] > 360:
+      states['input_angle'] -= 360
+    if states['input_angle'] < -360:
+      states['input_angle'] += 360
 
     # do not admit backwards motion
-    if states["angle_dot"] < 0.0:
-      states["angle_dot"] = 0.0
+    if states["input_angle_dot"] < 0.0:
+      states["input_angle_dot"] = 0.0
 
-  def draw(self, controller = None):
-    states = self.states
+class UJointViewer(Viewer):
+  def __init__(self):
+    super().__init__("A Universal Joint")
+
+  def draw(self, model, controller):
+    states = model.states
 
     # Basic pre-draw steps
     sglClear()
@@ -74,7 +78,7 @@ class UJointModel(Model):
     sglYellowPlasticMaterial()
 
     glPushMatrix()
-    glRotatef(states['angle'], 1, 0, 0)
+    glRotatef(states['input_angle'], 1, 0, 0)
 
     sglYellowPlasticMaterial()
     glPushMatrix()
@@ -84,7 +88,7 @@ class UJointModel(Model):
     glPopMatrix()
 
     sglYellowPlasticMaterial()
-    sglAddUJoint(1.0, states['ujoint_angle1'], states['ujoint_angle2'])
+    sglAddUJoint(1.0, states['angle1'], states['angle2'])
 
     sglYellowPlasticMaterial()
     glPushMatrix()
@@ -97,21 +101,6 @@ class UJointModel(Model):
 
 
 def main():
-  model = UJointModel()
-  viewer = Viewer()
-  controller = Controller(model, viewer)
-
-  while controller.check('run'):
-    # The controller updates the model and view states
-    controller.update()
-
-    # render the new scene
-    model.draw(controller)
-
-    # finalize the loop
-    controller.finalizeFrame()
-
-  # done - shutdown
-  controller.shutdown()
+  Controller(UJointModel(), UJointViewer()).run()
 
 main()
