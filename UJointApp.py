@@ -7,14 +7,14 @@ import math
 class UJointModel(Model):
   def __init__(self):
     super().__init__()
-    self.states["input_angle"] = 0.0
-    self.states["input_angle_dot"] = 0.0
-    self.states["angle1"] = 0.0
-    self.states["angle2"] = 0.0
+    self._states["input_angle"] = 0.0
+    self._states["input_angle_dot"] = 0.0
+    self._states["angle1"] = 0.0
+    self._states["angle2"] = 0.0
 
-  def update(self, dt, controls):
+  def update(self, dt, controls: dict):
     super().update(dt, controls)
-    states = self.states
+    states = self._states
 
     # integrate the states
     states['input_angle'] += states['input_angle_dot'] * dt
@@ -45,9 +45,7 @@ class UJointViewer(Viewer):
   def __init__(self):
     super().__init__("A Universal Joint")
 
-  def draw(self, model, controller):
-    states = model.states
-
+  def draw(self, modelStates: dict, controlStates: dict):
     # Basic pre-draw steps
     sglClear()
     glMatrixMode(GL_MODELVIEW)
@@ -69,7 +67,7 @@ class UJointViewer(Viewer):
     glRotatef(-15, 0, 0, 1)
 
     # draw a reference triad off to the left
-    if controller.check('show_hidden'):
+    if controlStates['show_hidden']:
       glPushMatrix()
       glTranslatef(-3.0,3.0,-2.0)
       sglTriad(2.0)
@@ -78,7 +76,7 @@ class UJointViewer(Viewer):
     sglYellowPlasticMaterial()
 
     glPushMatrix()
-    glRotatef(states['input_angle'], 1, 0, 0)
+    glRotatef(modelStates['input_angle'], 1, 0, 0)
 
     sglYellowPlasticMaterial()
     glPushMatrix()
@@ -88,7 +86,7 @@ class UJointViewer(Viewer):
     glPopMatrix()
 
     sglYellowPlasticMaterial()
-    sglAddUJoint(1.0, states['angle1'], states['angle2'])
+    sglAddUJoint(1.0, modelStates['angle1'], modelStates['angle2'])
 
     sglYellowPlasticMaterial()
     glPushMatrix()

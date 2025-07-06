@@ -7,16 +7,15 @@ import math
 class DemoModel(Model):
   def __init__(self):
     super().__init__()
-    self.time = 0.0
-    self.states["angle"] = 0.0
-    self.states["angle_dot"] = 0.0
-    self.states["z"] = 5.0
-    self.states["z_speed"] = 0.0
-    self.states["z_motion_direction"] = 1.0
+    self._states["angle"] = 0.0
+    self._states["angle_dot"] = 0.0
+    self._states["z"] = 5.0
+    self._states["z_speed"] = 0.0
+    self._states["z_motion_direction"] = 1.0
 
-  def update(self, dt, controls):
+  def update(self, dt, controls: dict):
     super().update(dt, controls)
-    states = self.states
+    states = self._states
 
     # integrate the states
     states['z'] += states['z_motion_direction'] * states['z_speed'] * dt;
@@ -52,9 +51,7 @@ class DemoViewer(Viewer):
   def __init__(self):
     super().__init__("SimpleGL First Demo")
 
-  def draw(self, model, controls = None):
-    states = model.states
-
+  def draw(self, modelStates: dict, controlStates: dict):
     # Basic pre-draw steps
     sglClear()
     glMatrixMode(GL_MODELVIEW)
@@ -68,8 +65,8 @@ class DemoViewer(Viewer):
 
     # draw a dynamic object
     glPushMatrix()
-    glTranslatef(0.0,0.0, -states['z'])
-    glRotatef(states['angle'], 1, 1, 0)
+    glTranslatef(0.0,0.0, -modelStates['z'])
+    glRotatef(modelStates['angle'], 1, 1, 0)
     sglBox(1.0,1.0,1.0)
     sglClosedCylinder(0.2, 4)
     glPopMatrix()

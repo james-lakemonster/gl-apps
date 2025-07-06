@@ -22,6 +22,9 @@ class Controller:
 
     self.timer = Timer()
 
+  def getControls(self):
+    return dict(self.controls)
+
   def run(self):
     while self.controls['run']:
       # Process the controls to update the model and the view
@@ -71,10 +74,10 @@ class Controller:
     self.processEvents()
 
     # update the model
-    self.model.update(self.deltaTime, self.controls)
+    self.model.update(self.deltaTime, self.getControls())
 
     # update the view
-    self.viewer.update(self.model, self)
+    self.viewer.update(self.model.getStates(), self.getControls())
 
     # pad runtime as desired
     pygame.time.wait(10)
