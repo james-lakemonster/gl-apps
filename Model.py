@@ -1,5 +1,3 @@
-import math
-
 class Model:
   def __init__(self):
     self._time = 0.0

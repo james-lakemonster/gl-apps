@@ -1,8 +1,37 @@
-from Model import Model
-from Viewer import Viewer
-from Controller import Controller
-from SimpleGL import *
+from Model import *
+from Viewer import *
+from Controller import *
 import math
+
+class UJointController(Controller):
+  def loadControls(self):
+    super().loadControls()
+    self.controls['show_triads'] = False
+    self.controls['torque'] = 0.0
+
+  def cyclicInit(self):
+    self.controls["torque"] = 0.0
+
+  def loadKeyCallbacks(self):
+    super().loadKeyCallbacks()
+    self.keyCallbacks[pygame.K_t] = {
+      'key_help_name': 'T',
+      'type': 'tap',
+      'description': 'Show/Hide unit vector triads',
+      'callback': lambda: self.toggleControl('show_triads')
+      }
+    self.keyCallbacks[pygame.K_RIGHT] = {
+      'key_help_name': 'ARROW_RIGHT/LEFT',
+      'type': 'held',
+      'description': 'Increase/Decrease angular rotation speed',
+      'callback': lambda: self.setControl('torque', self.controls['torque'] + 1.0)
+      }
+    self.keyCallbacks[pygame.K_LEFT] = {
+      'key_help_name': None,
+      'type': 'held',
+      'description': '',  # this key is documented with the RIGHT ARROW
+      'callback': lambda: self.setControl('torque', self.controls['torque'] - 1.0)
+      }
 
 class UJointModel(Model):
   def __init__(self):
@@ -67,7 +96,7 @@ class UJointViewer(Viewer):
     glRotatef(-15, 0, 0, 1)
 
     # draw a reference triad off to the left
-    if controlStates['show_hidden']:
+    if controlStates['show_triads']:
       glPushMatrix()
       glTranslatef(-3.0,3.0,-2.0)
       sglTriad(2.0)
@@ -99,6 +128,6 @@ class UJointViewer(Viewer):
 
 
 def main():
-  Controller(UJointModel(), UJointViewer()).run()
+  UJointController(UJointModel(), UJointViewer()).run()
 
 main()

@@ -17,6 +17,7 @@ class Viewer:
     pygame.display.set_mode((800,600), DOUBLEBUF|OPENGL|RESIZABLE)
     pygame.display.set_caption(self._name)
     sglInit()
+    print("\n\t" + self._name + "...  press 'H' for help.")
 
   def toggleFullScreen(self):
     pygame.display.toggle_fullscreen()

@@ -1,8 +1,44 @@
-from Model import Model
-from Viewer import Viewer
-from Controller import Controller
-from SimpleGL import *
+from Model import *
+from Viewer import *
+from Controller import *
 import math
+
+class DemoController(Controller):
+  def loadControls(self):
+    super().loadControls()
+    self.controls['force'] = 0.0
+    self.controls['torque'] = 0.0
+
+  def cyclicInit(self):
+    self.controls["force"] = 0.0
+    self.controls["torque"] = 0.0
+
+  def loadKeyCallbacks(self):
+    super().loadKeyCallbacks()
+    self.keyCallbacks[pygame.K_UP] = {
+      'key_help_name': 'ARROW_UP/DOWN',
+      'type': 'held',
+      'description': 'Increase/Decrease linear motion speed',
+      'callback': lambda: self.setControl('force', self.controls['force'] + 1.0)
+      }
+    self.keyCallbacks[pygame.K_DOWN] = {
+      'key_help_name': None, # this key is documented with the UP ARROW
+      'type': 'held',
+      'description': '',
+      'callback': lambda: self.setControl('force', self.controls['force'] - 1.0)
+      }
+    self.keyCallbacks[pygame.K_RIGHT] = {
+      'key_help_name': 'ARROW_RIGHT/LEFT',
+      'type': 'held',
+      'description': 'Increase/Decrease angular rotation speed',
+      'callback': lambda: self.setControl('torque', self.controls['torque'] + 1.0)
+      }
+    self.keyCallbacks[pygame.K_LEFT] = {
+      'key_help_name': None,
+      'type': 'held',
+      'description': '',  # this key is documented with the RIGHT ARROW
+      'callback': lambda: self.setControl('torque', self.controls['torque'] - 1.0)
+      }
 
 class DemoModel(Model):
   def __init__(self):
@@ -91,7 +127,7 @@ class DemoViewer(Viewer):
 
 
 def main():
-  Controller(DemoModel(), DemoViewer()).run()
+  DemoController(DemoModel(), DemoViewer()).run()
 
 
 main()
