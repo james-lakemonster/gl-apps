@@ -1,43 +1,44 @@
 import pygame
+import sys
 from Timer import Timer
-from Model import *
-from Viewer import *
+from Model import Model
+from Viewer import Viewer
 
 class Controller:
   # The Controller class handles
   #   Frame updates / time stepping
   #   pygame.events and keypresses
 
-  def __init__(self):
-    self.model = None
-    self.viewer = None
+  def __init__(self, model: Model, viewer: Viewer):
+    self.model = model
+    self.viewer = viewer
     self.deltaTime = 0.0
 
     self.loadControls()
     self.loadKeyCallbacks()
 
+    self.viewer.setup()
+    self.model.setup()
+
     self.timer = Timer()
 
-  def setModel(self, model):
-    self.model = model
+  def getControls(self):
+    return dict(self.controls)
 
-  def setViewer(self, viewer):
-    self.viewer = viewer
+  def run(self):
+    while self.controls['run']:
+      # Process the controls to update the model and the view
+      self.update()
 
-  def setup(self):
-    if self.viewer != None:
-      self.viewer.setup();
-    if self.model != None:
-      self.model.setup();
+    # done - shutdown
+    self.shutdown()
 
-    self.timer.reset()
-
-  def check(self, name: str):
-    if name in self.controls.keys():
-      value = self.controls[name]
-      if isinstance(value, bool):
-        return value
-    return False
+  # def check(self, name: str):
+  #   if name in self.controls.keys():
+  #     value = self.controls[name]
+  #     if isinstance(value, bool):
+  #       return value
+  #   return False
 
   def processEvents(self):
     # Loop through published pyGame Events
@@ -65,27 +66,23 @@ class Controller:
     # get the delta time
     self.deltaTime = self.timer.mark()
 
-    # without any input there are no applied forces/torques
-    self.controls["force"] = 0.0
-    self.controls["torque"] = 0.0
+    # some things may need to be reset every cycle prior to user input
+    self.cyclicInit()
 
     # process input and system events
     self.processEvents()
 
     # update the model
-    if self.model is not None:
-      self.model.update(self.deltaTime, self.controls)
+    self.model.update(self.deltaTime, self.getControls())
 
-    # update the view for default drawing mode
-    if self.viewer is not None:
-      self.viewer.preDrawUpdate()
-
-  def finalizeFrame(self):
-    # publish the new view
-    self.viewer.publishView()
+    # update the view
+    self.viewer.update(self.model.getStates(), self.getControls())
 
     # pad runtime as desired
     pygame.time.wait(10)
+
+  def cyclicInit(self):
+    pass
 
   def shutdown(self):
     # proper shutdown
@@ -118,9 +115,6 @@ class Controller:
   def loadControls(self):
     self.controls = {
       'run': True,
-      'show_hidden': False,
-      'force': 0.0,
-      'torque': 0.0
       }
 
   def loadKeyCallbacks(self):
@@ -137,46 +131,10 @@ class Controller:
         'description': 'Help',
         'callback': self.showHelp
         },
-      pygame.K_p: {
-        'key_help_name': 'P',
-        'type': 'tap',
-        'description': 'Show/Hide additional geometries',
-        'callback': lambda: self.toggleControl('show_hidden')
-        },
-      pygame.K_q: {
-        'key_help_name': 'Q',
-        'type': 'tap',
-        'description': 'Quit',
-        'callback': lambda: self.setControl('run', False)
-        },
       pygame.K_ESCAPE: {
         'key_help_name': 'ESC',
         'type': 'tap',
         'description': 'Quit',
         'callback': lambda: self.setControl('run', False)
-        },
-      pygame.K_UP: {
-        'key_help_name': 'ARROW_UP/DOWN',
-        'type': 'held',
-        'description': 'Increase/Decrease linear motion speed',
-        'callback': lambda: self.setControl('force', self.controls['force'] + 1.0)
-        },
-      pygame.K_DOWN: {
-        'key_help_name': None, # this key is documented with the UP ARROW
-        'type': 'held',
-        'description': '',
-        'callback': lambda: self.setControl('force', self.controls['force'] - 1.0)
-        },
-      pygame.K_RIGHT: {
-        'key_help_name': 'ARROW_RIGHT/LEFT',
-        'type': 'held',
-        'description': 'Increase/Decrease angular rotation speed',
-        'callback': lambda: self.setControl('torque', self.controls['torque'] + 1.0)
-        },
-      pygame.K_LEFT: {
-        'key_help_name': None,
-        'type': 'held',
-        'description': '',  # this key is documented with the RIGHT ARROW
-        'callback': lambda: self.setControl('torque', self.controls['torque'] - 1.0)
         },
       }
