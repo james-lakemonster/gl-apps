@@ -20,7 +20,12 @@ class Controller:
     self.viewer.setup()
     self.model.setup()
 
+    self.realtime = True
+    self.targetFps = 60.0
+    self.simTimeRatio = 1.0 # speed of simulation relative to wall clock
+    self.simDeltaTime = self.simTimeRatio / self.targetFps
     self.timer = Timer()
+    self.simTime = -self.simDeltaTime # the first render will be at 0.0
 
   def getControls(self):
     return dict(self.controls)
@@ -32,13 +37,6 @@ class Controller:
 
     # done - shutdown
     self.shutdown()
-
-  # def check(self, name: str):
-  #   if name in self.controls.keys():
-  #     value = self.controls[name]
-  #     if isinstance(value, bool):
-  #       return value
-  #   return False
 
   def processEvents(self):
     # Loop through published pyGame Events
@@ -63,8 +61,8 @@ class Controller:
           keyCallback['callback']()
 
   def update(self):
-    # get the delta time
-    self.deltaTime = self.timer.mark()
+    # advance time to the target dt
+    self.simTime += self.simDeltaTime
 
     # some things may need to be reset every cycle prior to user input
     self.cyclicInit()
@@ -73,13 +71,25 @@ class Controller:
     self.processEvents()
 
     # update the model
-    self.model.update(self.deltaTime, self.getControls())
+    self.model.update(self.simDeltaTime, self.getControls())
 
     # update the view
     self.viewer.update(self.model.getStates(), self.getControls())
 
-    # pad runtime as desired
-    pygame.time.wait(10)
+    # the published view should wait to match realtime
+    extraTimeMS = (self.simTime - self.timer.getElapsedTime()) * 1000
+    if extraTimeMS > 10:
+      pygame.time.wait(round(extraTimeMS - 0.5))
+    if extraTimeMS < -50:
+      if self.realtime == True:
+        print("*** Real time violation encountered at " + str(self.simTime) + " seconds")
+        self.realtime = False
+    elif self.realtime == False:
+        print("*** Real time has been restored at " + str(self.simTime) + " seconds")
+        self.realtime = True
+
+    # display the latest view
+    self.viewer.publish()
 
   def cyclicInit(self):
     pass
@@ -115,6 +125,7 @@ class Controller:
   def loadControls(self):
     self.controls = {
       'run': True,
+      'model_pause': False,
       }
 
   def loadKeyCallbacks(self):
@@ -130,6 +141,12 @@ class Controller:
         'type': 'tap',
         'description': 'Help',
         'callback': self.showHelp
+        },
+      pygame.K_p: {
+        'key_help_name': 'P',
+        'type': 'tap',
+        'description': 'Pause/Unpause the model',
+        'callback': lambda: self.toggleControl('model_pause')
         },
       pygame.K_ESCAPE: {
         'key_help_name': 'ESC',
