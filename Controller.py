@@ -1,6 +1,6 @@
 import pygame
 import sys
-from Timer import Timer
+from TimeManager import TimeManager, FixedDelayTimeManager
 from Model import Model
 from Viewer import Viewer
 
@@ -9,28 +9,30 @@ class Controller:
   #   Frame updates / time stepping
   #   pygame.events and keypresses
 
-  def __init__(self, model: Model, viewer: Viewer):
+  def __init__(self, model: Model, viewer: Viewer, timeManager: TimeManager = FixedDelayTimeManager()):
     self.model = model
     self.viewer = viewer
-    self.deltaTime = 0.0
 
     self.loadControls()
     self.loadKeyCallbacks()
 
     self.viewer.setup()
     self.model.setup()
+    self.timeManager = FixedDelayTimeManager()
 
-    self.realtime = True
-    self.targetFps = 60.0
-    self.simTimeRatio = 1.0 # speed of simulation relative to wall clock
-    self.simDeltaTime = self.simTimeRatio / self.targetFps
-    self.timer = Timer()
-    self.simTime = -self.simDeltaTime # the first render will be at 0.0
+    # self.realtime = True
+    # self.targetFps = 60.0
+    # self.simTimeRatio = 1.0 # speed of simulation relative to wall clock
+    # self.simDeltaTime = self.simTimeRatio / self.targetFps
+    # self.timer = Timer()
+    # self.simTime = -self.simDeltaTime # the first render will be at 0.0
 
   def getControls(self):
     return dict(self.controls)
 
   def run(self):
+    self.timeManager.start()
+    
     while self.controls['run']:
       # Process the controls to update the model and the view
       self.update()
@@ -61,9 +63,6 @@ class Controller:
           keyCallback['callback']()
 
   def update(self):
-    # advance time to the target dt
-    self.simTime += self.simDeltaTime
-
     # some things may need to be reset every cycle prior to user input
     self.cyclicInit()
 
@@ -71,25 +70,19 @@ class Controller:
     self.processEvents()
 
     # update the model
-    self.model.update(self.simDeltaTime, self.getControls())
+    self.model.update(self.timeManager.getModelStep(), self.getControls())
 
     # update the view
     self.viewer.update(self.model.getStates(), self.getControls())
 
     # the published view should wait to match realtime
-    extraTimeMS = (self.simTime - self.timer.getElapsedTime()) * 1000
-    if extraTimeMS > 10:
-      pygame.time.wait(round(extraTimeMS - 0.5))
-    if extraTimeMS < -50:
-      if self.realtime == True:
-        print("*** Real time violation encountered at " + str(self.simTime) + " seconds")
-        self.realtime = False
-    elif self.realtime == False:
-        print("*** Real time has been restored at " + str(self.simTime) + " seconds")
-        self.realtime = True
-
+    self.timeManager.syncViewTask()
+    
     # display the latest view
     self.viewer.publish()
+
+    # manage any post view delays
+    self.timeManager.postViewTask()
 
   def cyclicInit(self):
     pass
