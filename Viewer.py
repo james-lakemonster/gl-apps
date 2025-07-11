@@ -49,5 +49,6 @@ class Viewer:
     # render the new scene
     self.draw(modelStates, controlStates)
 
+  def publish(self):
     # publish the new view
     pygame.display.flip()

@@ -1,6 +1,6 @@
 import pygame
 import sys
-from Timer import Timer
+from PlayControls import PlayControls, FixedDelayPC
 from Model import Model
 from Viewer import Viewer
 
@@ -9,10 +9,10 @@ class Controller:
   #   Frame updates / time stepping
   #   pygame.events and keypresses
 
-  def __init__(self, model: Model, viewer: Viewer):
+  def __init__(self, model: Model, viewer: Viewer, playControls: PlayControls = FixedDelayPC()):
     self.model = model
     self.viewer = viewer
-    self.deltaTime = 0.0
+    self.playControls = playControls
 
     self.loadControls()
     self.loadKeyCallbacks()
@@ -20,25 +20,18 @@ class Controller:
     self.viewer.setup()
     self.model.setup()
 
-    self.timer = Timer()
-
   def getControls(self):
     return dict(self.controls)
 
   def run(self):
+    self.playControls.start()
+    
     while self.controls['run']:
       # Process the controls to update the model and the view
       self.update()
 
     # done - shutdown
     self.shutdown()
-
-  # def check(self, name: str):
-  #   if name in self.controls.keys():
-  #     value = self.controls[name]
-  #     if isinstance(value, bool):
-  #       return value
-  #   return False
 
   def processEvents(self):
     # Loop through published pyGame Events
@@ -63,9 +56,6 @@ class Controller:
           keyCallback['callback']()
 
   def update(self):
-    # get the delta time
-    self.deltaTime = self.timer.mark()
-
     # some things may need to be reset every cycle prior to user input
     self.cyclicInit()
 
@@ -73,13 +63,19 @@ class Controller:
     self.processEvents()
 
     # update the model
-    self.model.update(self.deltaTime, self.getControls())
+    self.model.update(self.playControls.getModelStep(), self.getControls())
 
     # update the view
     self.viewer.update(self.model.getStates(), self.getControls())
 
-    # pad runtime as desired
-    pygame.time.wait(10)
+    # the published view should wait to match realtime
+    self.playControls.syncViewTask()
+    
+    # display the latest view
+    self.viewer.publish()
+
+    # manage any post view delays
+    self.playControls.postViewTask()
 
   def cyclicInit(self):
     pass
@@ -115,6 +111,7 @@ class Controller:
   def loadControls(self):
     self.controls = {
       'run': True,
+      'model_pause': False,
       }
 
   def loadKeyCallbacks(self):
@@ -130,6 +127,12 @@ class Controller:
         'type': 'tap',
         'description': 'Help',
         'callback': self.showHelp
+        },
+      pygame.K_p: {
+        'key_help_name': 'P',
+        'type': 'tap',
+        'description': 'Pause/Unpause the model',
+        'callback': lambda: self.toggleControl('model_pause')
         },
       pygame.K_ESCAPE: {
         'key_help_name': 'ESC',
