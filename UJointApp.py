@@ -1,6 +1,7 @@
 from Model import *
 from Viewer import *
 from Controller import *
+from PlayControls import FixedStepPC
 import math
 
 class UJointController(Controller):
@@ -128,6 +129,6 @@ class UJointViewer(Viewer):
 
 
 def main():
-  UJointController(UJointModel(), UJointViewer()).run()
+  UJointController(UJointModel(), UJointViewer(), FixedStepPC()).run()
 
 main()

@@ -1,6 +1,6 @@
 import pygame
 import sys
-from TimeManager import TimeManager, FixedDelayTimeManager
+from PlayControls import PlayControls, FixedDelayPC
 from Model import Model
 from Viewer import Viewer
 
@@ -9,29 +9,22 @@ class Controller:
   #   Frame updates / time stepping
   #   pygame.events and keypresses
 
-  def __init__(self, model: Model, viewer: Viewer, timeManager: TimeManager = FixedDelayTimeManager()):
+  def __init__(self, model: Model, viewer: Viewer, playControls: PlayControls = FixedDelayPC()):
     self.model = model
     self.viewer = viewer
+    self.playControls = playControls
 
     self.loadControls()
     self.loadKeyCallbacks()
 
     self.viewer.setup()
     self.model.setup()
-    self.timeManager = FixedDelayTimeManager()
-
-    # self.realtime = True
-    # self.targetFps = 60.0
-    # self.simTimeRatio = 1.0 # speed of simulation relative to wall clock
-    # self.simDeltaTime = self.simTimeRatio / self.targetFps
-    # self.timer = Timer()
-    # self.simTime = -self.simDeltaTime # the first render will be at 0.0
 
   def getControls(self):
     return dict(self.controls)
 
   def run(self):
-    self.timeManager.start()
+    self.playControls.start()
     
     while self.controls['run']:
       # Process the controls to update the model and the view
@@ -70,19 +63,19 @@ class Controller:
     self.processEvents()
 
     # update the model
-    self.model.update(self.timeManager.getModelStep(), self.getControls())
+    self.model.update(self.playControls.getModelStep(), self.getControls())
 
     # update the view
     self.viewer.update(self.model.getStates(), self.getControls())
 
     # the published view should wait to match realtime
-    self.timeManager.syncViewTask()
+    self.playControls.syncViewTask()
     
     # display the latest view
     self.viewer.publish()
 
     # manage any post view delays
-    self.timeManager.postViewTask()
+    self.playControls.postViewTask()
 
   def cyclicInit(self):
     pass
