@@ -2,7 +2,34 @@ from Model import *
 from Viewer import *
 from Controller import *
 from PlayControls import FixedStepPC
+
 import math
+import numpy as np
+from scipy.integrate import solve_ivp
+
+torqueInput = [0.0]
+
+def fv(t,y):
+  global torqueInput
+  y_dot = np.array([0.0, 0.0, 0.0, 0.0])
+  # y = theta, q1, q2, theta_dot
+
+  # compute the state derivatives
+  theta = y[0]
+  q1 = y[1]
+  q2 = y[2]
+  theta_dot = y[3]
+
+  phi_dot = theta_dot * math.cos(q1) / math.cos(q2)
+  q1_dot = phi_dot * math.sin(q2)
+  q2_dot = -theta_dot * math.sin(q1)
+
+  y_dot[0] = theta_dot
+  y_dot[1] = q1_dot
+  y_dot[2] = q2_dot
+  y_dot[3] = torqueInput
+  return y_dot
+
 
 class UJointController(Controller):
   def loadControls(self):
@@ -80,40 +107,49 @@ class UJointModel(Model):
     self.wrapAngles()
 
   def positionUpdate(self, dt, controls: dict):
+    rad2deg = 180.0 / math.pi
+    deg2rad = math.pi / 180.0
     states = self._states
 
     # compute the state derivatives
-    states['input_angle_dot'] += controls['torque'] * 360.0 * dt
+    states['input_angle_dot'] += 4.0 * controls['torque'] * rad2deg * dt
 
     # advance the states
     states['input_angle'] += states['input_angle_dot'] * dt
 
     # the remaining angles are direct functions of the input shaft state
-    theta = states['input_angle']*math.pi/180.0
+    theta = states['input_angle'] * deg2rad
     phi   = -math.pi/4 # inclination angle
     alpha = math.atan(math.cos(theta)*math.tan(phi))
     beta  = math.asin(-math.sin(theta)*math.sin(phi))
 
-    states['angle1'] = alpha * 180.0 / math.pi
-    states['angle2'] = beta * 180.0 / math.pi
+    states['angle1'] = alpha * rad2deg
+    states['angle2'] = beta * rad2deg
 
   def velocityUpdate(self, dt, controls: dict):
+    global torqueInput
+    torqueInput = 4.0 * controls['torque']
+
+    rad2deg = 180.0 / math.pi
+    deg2rad = math.pi / 180.0
+
     states = self._states
 
-    # compute the state derivatives
-    states['input_angle_dot'] += controls['torque'] * 360.0 * dt
-    theta_dot = states['input_angle_dot']*math.pi/180.0
+    # compute the state derivatives by integrating the "fv" function
+    theta = states['input_angle'] * deg2rad
+    theta_dot = states['input_angle_dot']*deg2rad
+    q1 = states['angle1']*deg2rad
+    q2 = states['angle2']*deg2rad
 
-    q1 = states['angle1']*math.pi/180.0
-    q2 = states['angle2']*math.pi/180.0
-    phi_dot = theta_dot * math.cos(q1) / math.cos(q2)
+    y0 = np.array([theta, q1, q2, theta_dot])
+    ts = np.array([0.0, dt])
+    sol = solve_ivp(fv, [0.0, dt], y0, t_eval=ts)
 
-    q1_dot = phi_dot * math.sin(q2)
-    q2_dot = -theta_dot * math.sin(q1)
+    states['input_angle']     = sol.y[0][1] * rad2deg
+    states['angle1']          = sol.y[1][1] * rad2deg
+    states['angle2']          = sol.y[2][1] * rad2deg
+    states['input_angle_dot'] = sol.y[3][1] * rad2deg
 
-    states['input_angle'] += states['input_angle_dot'] * dt
-    states['angle1'] += q1_dot * dt * 180.0 / math.pi
-    states['angle2'] += q2_dot * dt * 180.0 / math.pi
 
   def wrapAngles(self):
     states = self._states
