@@ -1,7 +1,7 @@
 import time
 import pygame
 
-class PlayControls:
+class StepControls:
 
   def __init__(self):
     pass
@@ -37,7 +37,7 @@ class Timer:
     self.markerTime = t
     return dt
 
-class FixedDelayPC(PlayControls):
+class FixedDelayStep(StepControls):
 
   def __init__(self):
     self._delayMs = 10
@@ -58,7 +58,7 @@ class FixedDelayPC(PlayControls):
   def postViewTask(self):
     pygame.time.wait(10)
 
-class FixedStepPC(PlayControls):
+class FixedStep(StepControls):
 
   def __init__(self):
     self._timer = Timer()

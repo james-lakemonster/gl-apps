@@ -1,6 +1,6 @@
 import pygame
 import sys
-from PlayControls import PlayControls, FixedDelayPC
+from StepControls import StepControls, FixedDelayStep
 from Model import Model
 from Viewer import Viewer
 
@@ -9,10 +9,10 @@ class Controller:
   #   Frame updates / time stepping
   #   pygame.events and keypresses
 
-  def __init__(self, model: Model, viewer: Viewer, playControls: PlayControls = FixedDelayPC()):
+  def __init__(self, model: Model, viewer: Viewer, stepControls: StepControls = FixedDelayStep()):
     self.model = model
     self.viewer = viewer
-    self.playControls = playControls
+    self.playControls = stepControls
 
     self.loadControls()
     self.loadKeyCallbacks()
